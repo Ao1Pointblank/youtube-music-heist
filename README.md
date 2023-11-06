@@ -32,3 +32,7 @@ it leaves all digits and alphabetical characters, even cyrillic/japanese etc, an
 it should be fairly easy to modify to your own needs.
 
 finally, it will take the last session of downloads and make a symbolic link in the download directory and title it "latest" so you can easily grab the contents and copy them to a phone, music folder, smart fridge, etc., topping off your playlist!
+
+# What's next?
+- automate the process of checking for new additions to the playlist. run at startup/login, and send notification or maybe even open a zenity window prompting interaction to confirm downloads
+- add more "--options" so users won't have to edit the file and add their api-key, playlist id, and download directory (hardcoding is not nice)
