@@ -33,6 +33,19 @@ it should be fairly easy to modify to your own needs.
 
 finally, it will take the last session of downloads and make a symbolic link in the download directory and title it "latest" so you can easily grab the contents and copy them to a phone, music folder, smart fridge, etc., topping off your playlist!
 
+![Screenshot_from_2023-11-06_05-52-28](https://github.com/Ao1Pointblank/youtube-music-heist/assets/88149675/04ddbcf5-4ce3-48e5-8817-6a4497757c13)
+# What do the errors mean?!
+``ERROR: [youtube] SYfcy0QmdPs: Video unavailable. This video is not available``: 
+it's been deleted or unlisted. use the [Wayback Machine](https://web.archive.org) to check for a youtube.com video with a matching ID. This is usually only a problem when using with the "all" option since newly added videos won't be unlisted. artists sometimes do this to some old versions of their songs when they remaster them or change label companies
+
+``Corresponding audio file not found for blah/blah/blah/song.jpg``:
+this is what happens when the script can't find a matching .opus file for the .jpg thumbnail it has just nicely cropped for you. this is usually only with weird non-music playlist items which only have .m4a audio formats available. these may be embedded with an uncropped image, unfortunately. check your sessions folder for m4a files and adjust them manually.
+
+``Processed file: /blah/blah/blah/song.opus``, ``Cleaned Performer: Artist``:
+this is a good thing to see, but maybe check the artist metadata for these files just in case. it is letting you know that it deleted some fluff like " - Topic" or " Official" from the artist name.
+
+there are other error messages but i don't know yet under what circumstances they will appear.
+
 # What's next?
 - automate the process of checking for new additions to the playlist. run at startup/login, and send notification or maybe even open a zenity window prompting interaction to confirm downloads
 - add more "--options" so users won't have to edit the file and add their api-key, playlist id, and download directory (hardcoding is not nice)
