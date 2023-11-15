@@ -19,7 +19,7 @@ NC='\033[0m' # No Color
 if [[ $1 =~ ^[1-9][0-9]*$ ]]; then
 	#download only the $1 latest thumbnails & music
 	echo -e "${GREEN}downloading the last $1 audio and thumbnails...${NC}";
-	yt-dlp -i --no-overwrites --write-thumbnail --extract-audio --add-metadata --audio-format best --max-sleep-interval 5 --min-sleep-interval 2 --user-agent "$ytdlp_useragent" --output "$download_dir/%(title)s.%(ext)s" "$playlist_id" --playlist-items 1-"$1"
+	yt-dlp -i --quiet --progress --no-overwrites --write-thumbnail --extract-audio --add-metadata --audio-format best --max-sleep-interval 5 --min-sleep-interval 2 --user-agent "$ytdlp_useragent" --output "$download_dir/%(title)s.%(ext)s" "$playlist_id" --playlist-items 1-"$1"
 elif [[ "$1" = "all" ]] ; then
 	echo -e "${GREEN}downloading all playlist audio and thumbnails...${NC}";
 	yt-dlp -i --quiet --progress --no-overwrites --write-thumbnail --extract-audio --add-metadata --audio-format best --max-sleep-interval 5 --min-sleep-interval 2 --user-agent "$ytdlp_useragent" --output "$download_dir/%(title)s.%(ext)s" "$playlist_id"
@@ -78,27 +78,39 @@ EOF
 	#get newly added playlist items in list (vid-ID1 vid-ID2 vid-ID3...)
 	echo -e "${GREEN}looking for new additions to playlist...${NC}" ;
 	new_items="$(find "$sessions_dir" -maxdepth 1 -type f -name "EXPLODED-*.txt" | xargs ls -t | head -2 | xargs diff | grep '^<' | cut -c 3- | tr '\n' ' ')"
+	number_new_items=$(echo "$new_items" | wc -w)
 
 	if [ -n "$new_items" ] ; then
-		echo -e "${GREEN}downloading new audio and thumbnails...${NC}";
-		yt-dlp -i --no-overwrites --write-thumbnail --extract-audio --add-metadata --audio-format best --max-sleep-interval 5 --min-sleep-interval 2 --user-agent "$ytdlp_useragent" --output "$download_dir/%(title)s.%(ext)s" --no-playlist $new_items
+		echo -e "${GREEN}downloading $number_new_items new audio and thumbnails...${NC}";
+		yt-dlp -i --quiet --progress --no-overwrites --write-thumbnail --extract-audio --add-metadata --audio-format best --max-sleep-interval 5 --min-sleep-interval 2 --user-agent "$ytdlp_useragent" --output "$download_dir/%(title)s.%(ext)s" --no-playlist $new_items
 	else
 		echo -e "${RED}no new playlist items to download${NC}"
 		exit 0
 	fi
 fi
 
-#crop thumbnails
-echo -e "${GREEN}cropping thumbnails...${NC}"
-for img_file in "$download_dir"/*.{jpg,webp}; do
-	convert "$img_file" -crop 720x720+280+0 +repage "${img_file%.*}.jpg"
-done ;
-
-#image file cleanup
-echo -e "${GREEN}cleaning up junk images...${NC}"
+#pre-cropping cleanup
 if [ -e "$download_dir/Youtube Music Likes.jpg" ] ; then
 	rm "$download_dir/Youtube Music Likes.jpg"
 fi ;
+
+#crop thumbnails
+echo -e "${GREEN}cropping thumbnails...${NC}"
+
+#for weird small thumbnails
+mkdir "$download_dir"/thumbs-temp
+small_thumbs_temp_dir="$download_dir"/thumbs-temp
+find "$download_dir" \( -iname "*.jpg" -o -iname "*.webp" \) -type f -exec identify -format '%w %h %i\n' '{}' \; | awk -F ' ' '$1 < 720 && $2 < 720 { $1=""; $2=""; print substr($0, 3) }' | xargs -I {} mogrify -resize 720x720^ -gravity center -extent 720x720 -background black -format jpg -path "$small_thumbs_temp_dir" +repage "{}" ;
+
+#for regularly sized images
+for img_file in "$download_dir"/*.{jpg,webp}; do
+	convert "$img_file" -crop 720x720+280+0 +repage "${img_file%.*}.jpg" ;
+done ;
+
+#image file cleanup
+mv --force "$small_thumbs_temp_dir"/*.jpg "$download_dir"
+rmdir "$small_thumbs_temp_dir"
+echo -e "${GREEN}cleaning up junk images...${NC}"
 find "$download_dir" -type f -name "*.webp" -exec rm {} \; ;
 
 #embed images
@@ -160,7 +172,7 @@ readarray -t opus_with_junk < <(find "$download_dir" -name '*.opus' -exec grep -
 # Iterate over each file to process
 for opus_with_junk_file_path in "${opus_with_junk[@]}"; do
     # Step 2: Extract Performer information
-    cleaned_artist_name=$(mediainfo "$opus_with_junk_file_path" | grep "Performer" | sed 's/^[^:]*: //' | sed -e 's/Official[[:space:]]*$//' -e 's/ - Topic[[:space:]]*$//')
+    cleaned_artist_name=$(mediainfo "$opus_with_junk_file_path" sed -e 's/Official[[:space:]]*$//' -e 's/ - Topic[[:space:]]*$//')
 
     if [ -n "$cleaned_artist_name" ]; then
     	#output to same file
