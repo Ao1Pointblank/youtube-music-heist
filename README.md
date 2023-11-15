@@ -46,6 +46,14 @@ this is a good thing to see, but maybe check the artist metadata for these files
 
 there are other error messages but i don't know yet under what circumstances they will appear.
 
+#genius-lyrics.py
+this is an optional script i planned on incorporating into the final version. it searches genius.com but can be easily confused if the artist name / song title of the file from youtube does not match exactly
+i also ran into problems using opustags to embed the lyrics into the audio files, when there was already an image file also embedded. a workaround is to save the lyrics as a .txt file and use a music player that will detect the lyrics in the same directory as the audio (i don't know of any such players, please suggest one if you know one)
+
+usage of genius-lyrics.py:
+``python3 ./genius-lyrics.py "ARTIST" "SONG TITLE"`` 
+output is sent to stdout and can easily be piped into a file with > 
+
 # What's next?
 - automate the process of checking for new additions to the playlist. run at startup/login, and send notification or maybe even open a zenity window prompting interaction to confirm downloads
 - add more "--options" so users won't have to edit the file and add their api-key, playlist id, and download directory (hardcoding is not nice)
