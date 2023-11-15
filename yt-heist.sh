@@ -77,12 +77,16 @@ EOF
 
 	#get newly added playlist items in list (vid-ID1 vid-ID2 vid-ID3...)
 	echo -e "${GREEN}looking for new additions to playlist...${NC}" ;
-	new_items="$(find "$sessions_dir" -maxdepth 1 -type f -name "EXPLODED-*.txt" | xargs ls -t | head -2 | xargs diff | grep '^<' | cut -c 3- | tr '\n' ' ')"
-	number_new_items=$(echo "$new_items" | wc -w)
+	new_items="$(find "$sessions_dir" -maxdepth 1 -type f -name "EXPLODED-*.txt" | xargs ls -t | head -2 | xargs diff | grep '^<' | cut -c 3- )"
+	number_new_items=$(echo "$new_items" | wc -l)
+
+	touch "$sessions_dir/batchfile-$session_num"
+	new_items_batchfile="$sessions_dir/batchfile-$session_num"
+	echo "$new_items" > "$new_items_batchfile"
 
 	if [ -n "$new_items" ] ; then
 		echo -e "${GREEN}downloading $number_new_items new audio and thumbnails...${NC}";
-		yt-dlp -i --quiet --progress --no-overwrites --write-thumbnail --extract-audio --add-metadata --audio-format best --max-sleep-interval 5 --min-sleep-interval 2 --user-agent "$ytdlp_useragent" --output "$download_dir/%(title)s.%(ext)s" --no-playlist $new_items
+		yt-dlp -i --quiet --progress --no-overwrites --write-thumbnail --extract-audio --add-metadata --audio-format best --max-sleep-interval 5 --min-sleep-interval 2 --user-agent "$ytdlp_useragent" --output "$download_dir/%(title)s.%(ext)s" --no-playlist -a "$new_items_batchfile"
 	else
 		echo -e "${RED}no new playlist items to download${NC}"
 		exit 0
