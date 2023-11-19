@@ -7,7 +7,7 @@ What you need:
 - yt-dlp (https://github.com/yt-dlp/yt-dlp)
 - opustags (https://github.com/fmang/opustags)
 - python3
-- imagemagick (uses the convert command to crop thumbnails)
+- imagemagick (uses the mogrify command to crop thumbnails)
 
 # 4 Usages:
 ``./yt-heist.sh all``
