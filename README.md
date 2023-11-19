@@ -9,12 +9,15 @@ What you need:
 - python3
 - imagemagick (uses the convert command to crop thumbnails)
 
-# 3 Usages:
+# 4 Usages:
 ``./yt-heist.sh all``
 attempt to download all videos from the playlist ID. this is the recommended way to run it for the first time.
 
 ``./yt-heist.sh NUMBER``
 download the last NUMBER of videos from the playlist ID. Starts downloading from the top of the playlist. Does not check if you already downloaded the same files in the last session.
+
+``./yt-heist search "song1" "song2" "song3"...``
+downloads based on search terms rather than from a specific playlist. processes/sanitizes thumbnails and metadata same as the other modes.
 
 ``./yt-heist``
 this will create a list of video IDs from the given playlist ID, and compare this list to what was created last session. it will download any new video IDs, regardless where they are located in the playlist. 
